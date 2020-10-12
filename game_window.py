@@ -8,15 +8,15 @@ pygame.init()
 # Defining pygame appearance
 size = (width, height) = (400, 600)
 window = pygame.display.set_mode(size)
-window.fill((255, 255, 255))
 pygame.display.set_caption('Chopstick(Hand Game)')
-player_turn = True
 
 # Making instances
 game = Chopstick([(1, 1), (1, 1)])
 ai = Chopstick_AI()
 training_done = False
 ai.train(10000)
+mine = None
+his = None
 
 # Fonts
 instruction_font = pygame.font.Font(pygame.font.get_default_font(), 20)
@@ -28,6 +28,7 @@ three = pygame.transform.scale(pygame.image.load('pictures/3.png'), (140, 160))
 four = pygame.transform.scale(pygame.image.load('pictures/4.png'), (140, 160))
 
 while True:
+    window.fill((255, 255, 255))
     # To exit from the window
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -47,13 +48,53 @@ while True:
             picture_rect[row, side].center = (x_coordinate, y_coordinate)
             window.blit(picture, picture_rect[row, side])
 
-    # Updating player turns
-    if game.player:
-        status = instruction_font.render('Players Turn', True, (0, 0, 0))
+    if not game.over:
+        # Updating player turns
+        if game.player:
+            status = instruction_font.render('Players Turn', True, (0, 0, 0))
+
+            # Checking if the game is over
+            if game.states[1] == (0, 0):
+                game.over = True
+                continue
+
+            # Checking for collide_point:
+            left_1, _, _ = pygame.mouse.get_pressed()
+            if left_1 == 1 and not mine:
+                x, y = pygame.mouse.get_pos()
+                for item in [(1, 0), (1, 1)]:
+                    if game.states[item[0]][item[1]] == 0:
+                        continue
+                    if picture_rect[item].collidepoint(x, y):
+                        mine = item
+            if left_1 == 1 and mine:
+                x, y = pygame.mouse.get_pos()
+                for item in [(0, 0), (0, 1)]:
+                    if game.states[item[0]][item[1]] == 0:
+                        continue
+                    if picture_rect[item].collidepoint(x, y):
+                        his = item
+                        game.move((mine, his))
+                        mine = None
+                        his = None
+                        break
+        else:
+            status = instruction_font.render('AIs Turn', True, (0, 0, 0))
+            action = ai.best_action(game.states, game.player)
+            if not action:
+                game.over = True
+                continue
+            game.move(action)
+        status_rect = status.get_rect()
+        status_rect.center = (width / 2, 10)
+        window.blit(status, status_rect)
     else:
-        status = instruction_font.render('AIs Turn', True, (0, 0, 0))
-    status_rect = status.get_rect()
-    status_rect.center = (width / 2, 10)
-    window.blit(status, status_rect)
+        if game.player:
+            status = instruction_font.render('AI won', True, (0, 0, 0))
+        else:
+            status = instruction_font.render('Player Won', True, (0, 0, 0))
+        status_rect = status.get_rect()
+        status_rect.center = (width / 2, 10)
+        window.blit(status, status_rect)
 
     pygame.display.update()
