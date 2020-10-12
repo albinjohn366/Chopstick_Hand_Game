@@ -125,6 +125,9 @@ class Chopstick_AI:
                     else:
                         self.update(last['ai']['state'], last['ai'][
                             'action'], new_state, -1, game.player)
+                    break
+            print('Training done {}th time'.format(i + 1))
+        self.training = True
 
     def play(self, states, player):
         action = self.best_action(states, player)
