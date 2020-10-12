@@ -78,13 +78,21 @@ while True:
                         mine = None
                         his = None
                         break
+            if mine:
+                pygame.draw.rect(window, (128, 0, 0), picture_rect[mine], 3)
         else:
             status = instruction_font.render('AIs Turn', True, (0, 0, 0))
             action = ai.best_action(game.states, game.player)
             if not action:
                 game.over = True
                 continue
-            game.move(action)
+
+            # Bringing in some wait time
+            current_time = pygame.time.get_ticks()
+            exit_time = current_time + 0.5
+
+            if pygame.time.get_ticks() > exit_time:
+                game.move(action)
         status_rect = status.get_rect()
         status_rect.center = (width / 2, 10)
         window.blit(status, status_rect)

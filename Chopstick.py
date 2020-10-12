@@ -4,7 +4,7 @@ import random
 class Chopstick:
     def __init__(self, states):
         self.states = states
-        self.player = False
+        self.player = True
         self.over = False
 
     def move(self, action):
@@ -132,7 +132,7 @@ class Chopstick_AI:
                     if game.player and last['player']['state']:
                         self.update(last['player']['state'], last['player'][
                             'action'], new_state, 0, game.player)
-                    if not game.player and last['player']['state']:
+                    if not game.player and last['ai']['state']:
                         self.update(last['ai']['state'], last['ai'][
                             'action'], new_state, 0, game.player)
             print('Training done {}th time'.format(i + 1))
